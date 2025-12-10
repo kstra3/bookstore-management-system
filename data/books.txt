@@ -1,0 +1,31 @@
+10
+Axion Esti
+1959
+13.00
+Epitaphios
+1936
+9.00
+Good Omens: The Nice and Accurate Prophecies of Agnes Nutter, Witch
+1990
+12.50
+Logbook I
+1940
+14.00
+Mythistorima
+1935
+12.00
+Orientations
+1940
+15.00
+Romiosini
+1954
+16.00
+The Canon
+1989
+24.00
+The Last Temptation of Christ
+1955
+12.00
+Zorba the Greek
+1985
+10.00
