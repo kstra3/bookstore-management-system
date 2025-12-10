@@ -1,25 +1,18 @@
 # Compiled executables
 *.exe
 *.out
-bookstore
+a.out
+a.exe
 
 # Object files
 *.o
 *.obj
 
-# Data files (optional - remove these lines if you want to include sample data)
-# books.txt
-# authors.txt
-# writes.txt
-
-# IDE and editor files
+# Editor directories
 .vscode/
 .vs/
-*.swp
-*.swo
-*~
 
-# OS files
-.DS_Store
-Thumbs.db
-desktop.ini
+# Build artifacts
+*.dll
+*.so
+*.dylib

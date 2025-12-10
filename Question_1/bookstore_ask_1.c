@@ -31,6 +31,8 @@ writes *writes_arr = NULL;
 int book_count = 0;
 int author_count = 0;
 int writes_count = 0;
+
+
 void load_data();
 void save_data();
 void insert_author();
@@ -42,7 +44,7 @@ void delete_book();
 void display_menu();
 int binary_search_book(char *title);
 int binary_search_author_by_id(int id);
-int binary_search_author_by_surname(char *surname);
+int linear_search_author_by_surname(char *surname);
 int binary_search_writes(int writer_id, char *title);
 void sort_books();
 void sort_authors();
@@ -52,6 +54,13 @@ char* read_string(FILE *fp);
 void insert_sorted_book(book new_book);
 void insert_sorted_author(author new_author);
 void insert_sorted_writes(writes new_write);
+int compare_books(const void *a, const void *b);
+int compare_authors(const void *a, const void *b);
+int compare_writes(const void *a, const void *b);    
+
+
+
+
 int main() {
     int choice;
     char input[MAX_LINE];
@@ -64,7 +73,7 @@ int main() {
         }
         if (sscanf(input, "%d", &choice) != 1) {
             clear_screen();
-            printf("Invalid choice. Please enter a number.\n");
+            printf("Error: '%s' is not a valid number. Please enter a number between 1-7.\n", input);
             printf("\nPress Enter to continue...");
             getchar();
             clear_screen();
@@ -114,7 +123,7 @@ int main() {
                 return 0;
             default:
                 clear_screen();
-                printf("Invalid choice. Please try again.\n");
+                printf("Error: Choice %d is out of range. Please select 1-7.\n", choice);
                 printf("\nPress Enter to continue...");
                 getchar();
                 clear_screen();
@@ -122,15 +131,20 @@ int main() {
     }
     return 0;
 }
+
+
+
+
+
 void display_menu() {
     printf("\n\n");
     printf("  +=====================================================================+\n");
     printf("  |                                                                     |\n");
-    printf("  |         ##  ##  ########  ##  ##  ##        ####  ######            |\n");
-    printf("  |         ##  ##     ##     ##  ##  ##         ##   ##   ##           |\n");
-    printf("  |         ##  ##     ##     ######  ##         ##   ######            |\n");
-    printf("  |         ##  ##     ##     ##  ##  ##         ##   ##   ##           |\n");
-    printf("  |          ####      ##     ##  ##  ######    ####  ######            |\n");
+    printf("  |         ##  ##  ########  ##  ##    ##      ####  ######            |\n");
+    printf("  |         ##  ##     ##     ##  ##    ##       ##   ##   ##           |\n");
+    printf("  |         ##  ##     ##     ######    ##       ##   ######            |\n");
+    printf("  |         ##  ##     ##     ##  ##    ##       ##   ##   ##           |\n");
+    printf("  |          ####      ##     ##  ##    ######  ####  ######            |\n");
     printf("  |                                                                     |\n");
     printf("  |                  ===================================                |\n");
     printf("  |                   THE OPEN BOOK - UNIVERSITY LIBRARY                |\n");
@@ -180,6 +194,10 @@ char* read_string(FILE *fp) {
     }
     buffer[strcspn(buffer, "\n")] = '\0';
     char *str = (char*)malloc(strlen(buffer) + 1);
+    if (str == NULL) {
+        printf("Error: Memory allocation failed while reading file\n");
+        return NULL;
+    }
     strcpy(str, buffer);
     return str;
 }
@@ -190,6 +208,12 @@ void load_data() {
         fscanf(fp, "%d\n", &book_count);
         if (book_count > 0) {
             book_arr = (book*)malloc(book_count * sizeof(book));
+            if (book_arr == NULL) {
+                printf("Error: Memory allocation failed for books\n");
+                book_count = 0;
+                fclose(fp);
+                return;
+            }
             for (int i = 0; i < book_count; i++) {
                 book_arr[i].title = read_string(fp);
                 fscanf(fp, "%d\n", &book_arr[i].release_date);
@@ -206,6 +230,12 @@ void load_data() {
         fscanf(fp, "%d\n", &author_count);
         if (author_count > 0) {
             author_arr = (author*)malloc(author_count * sizeof(author));
+            if (author_arr == NULL) {
+                printf("Error: Memory allocation failed for authors\n");
+                author_count = 0;
+                fclose(fp);
+                return;
+            }
             for (int i = 0; i < author_count; i++) {
                 fscanf(fp, "%d\n", &author_arr[i].writer_id);
                 author_arr[i].surname = read_string(fp);
@@ -223,7 +253,6 @@ void load_data() {
         int unique_count;
         fscanf(fp, "%d\n", &unique_count);
         
-        // Temporary storage - we'll expand as we parse
         writes_count = 0;
         writes_arr = NULL;
         
@@ -238,8 +267,17 @@ void load_data() {
                 int author_id = atoi(token);
                 
                 // Add new entry to writes_arr
-                writes_arr = (writes*)realloc(writes_arr, (writes_count + 1) * sizeof(writes));
+                writes *temp_writes = (writes*)realloc(writes_arr, (writes_count + 1) * sizeof(writes));
+                if (temp_writes == NULL) {
+                    printf("Error: Memory allocation failed for writes\n");
+                    break;
+                }
+                writes_arr = temp_writes;
                 writes_arr[writes_count].title = (char*)malloc(strlen(title) + 1);
+                if (writes_arr[writes_count].title == NULL) {
+                    printf("Error: Memory allocation failed for write title\n");
+                    break;
+                }
                 strcpy(writes_arr[writes_count].title, title);
                 writes_arr[writes_count].writer_id = author_id;
                 writes_count++;
@@ -342,38 +380,33 @@ void save_data() {
     }
     fclose(fp);
 }
+int compare_books(const void *a, const void *b) {
+    return strcmp(((book*)a)->title, ((book*)b)->title);
+}
+
+int compare_authors(const void *a, const void *b) {
+    return ((author*)a)->writer_id - ((author*)b)->writer_id;
+}
+
+int compare_writes(const void *a, const void *b) {
+    int id_diff = ((writes*)a)->writer_id - ((writes*)b)->writer_id;
+    if (id_diff != 0) return id_diff;
+    return strcmp(((writes*)a)->title, ((writes*)b)->title);
+}
+
 void sort_books() {
-    for (int i = 0; i < book_count - 1; i++) {
-        for (int j = 0; j < book_count - i - 1; j++) {
-            if (strcmp(book_arr[j].title, book_arr[j + 1].title) > 0) {
-                book temp = book_arr[j];
-                book_arr[j] = book_arr[j + 1];
-                book_arr[j + 1] = temp;
-            }
-        }
+    if (book_count > 1) {
+        qsort(book_arr, book_count, sizeof(book), compare_books);
     }
 }
 void sort_authors() {
-    for (int i = 0; i < author_count - 1; i++) {
-        for (int j = 0; j < author_count - i - 1; j++) {
-            if (author_arr[j].writer_id > author_arr[j + 1].writer_id) {
-                author temp = author_arr[j];
-                author_arr[j] = author_arr[j + 1];
-                author_arr[j + 1] = temp;
-            }
-        }
+    if (author_count > 1) {
+        qsort(author_arr, author_count, sizeof(author), compare_authors);
     }
 }
 void sort_writes() {
-    for (int i = 0; i < writes_count - 1; i++) {
-        for (int j = 0; j < writes_count - i - 1; j++) {
-            int cmp = (writes_arr[j].writer_id - writes_arr[j + 1].writer_id);
-            if (cmp > 0 || (cmp == 0 && strcmp(writes_arr[j].title, writes_arr[j + 1].title) > 0)) {
-                writes temp = writes_arr[j];
-                writes_arr[j] = writes_arr[j + 1];
-                writes_arr[j + 1] = temp;
-            }
-        }
+    if (writes_count > 1) {
+        qsort(writes_arr, writes_count, sizeof(writes), compare_writes);
     }
 }
 int binary_search_book(char *title) {
@@ -399,7 +432,7 @@ int binary_search_author_by_id(int id) {
     }
     return -1;
 }
-int binary_search_author_by_surname(char *surname) {
+int linear_search_author_by_surname(char *surname) {
     for (int i = 0; i < author_count; i++) {
         if (strcmp(author_arr[i].surname, surname) == 0) {
             return i;
@@ -433,22 +466,98 @@ int binary_search_writes(int writer_id, char *title) {
     return -1;
 }
 void insert_sorted_book(book new_book) {
-    book_arr = (book*)realloc(book_arr, (book_count + 1) * sizeof(book));
-    book_arr[book_count] = new_book;
+    // Find insertion position using binary search
+    int pos = 0;
+    int left = 0, right = book_count - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        int cmp = strcmp(book_arr[mid].title, new_book.title);
+        if (cmp < 0) {
+            left = mid + 1;
+            pos = left;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    book *temp = (book*)realloc(book_arr, (book_count + 1) * sizeof(book));
+    if (temp == NULL && book_count >= 0) {
+        printf("Error: Memory allocation failed for book array\n");
+        free(new_book.title);
+        return;
+    }
+    book_arr = temp;
+    
+    // Shift elements to the right
+    for (int i = book_count; i > pos; i--) {
+        book_arr[i] = book_arr[i - 1];
+    }
+    
+    book_arr[pos] = new_book;
     book_count++;
-    sort_books();
 }
 void insert_sorted_author(author new_author) {
-    author_arr = (author*)realloc(author_arr, (author_count + 1) * sizeof(author));
-    author_arr[author_count] = new_author;
+    // Find insertion position
+    int pos = 0;
+    int left = 0, right = author_count - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        if (author_arr[mid].writer_id < new_author.writer_id) {
+            left = mid + 1;
+            pos = left;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    author *temp = (author*)realloc(author_arr, (author_count + 1) * sizeof(author));
+    if (temp == NULL && author_count >= 0) {
+        printf("Error: Memory allocation failed for author array\n");
+        free(new_author.surname);
+        free(new_author.name);
+        return;
+    }
+    author_arr = temp;
+    
+    // Shift elements to the right
+    for (int i = author_count; i > pos; i--) {
+        author_arr[i] = author_arr[i - 1];
+    }
+    
+    author_arr[pos] = new_author;
     author_count++;
-    sort_authors();
 }
 void insert_sorted_writes(writes new_write) {
-    writes_arr = (writes*)realloc(writes_arr, (writes_count + 1) * sizeof(writes));
-    writes_arr[writes_count] = new_write;
+    // Find insertion position
+    int pos = 0;
+    int left = 0, right = writes_count - 1;
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        int id_cmp = writes_arr[mid].writer_id - new_write.writer_id;
+        int cmp = (id_cmp == 0) ? strcmp(writes_arr[mid].title, new_write.title) : id_cmp;
+        if (cmp < 0) {
+            left = mid + 1;
+            pos = left;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    writes *temp = (writes*)realloc(writes_arr, (writes_count + 1) * sizeof(writes));
+    if (temp == NULL && writes_count >= 0) {
+        printf("Error: Memory allocation failed for writes array\n");
+        free(new_write.title);
+        return;
+    }
+    writes_arr = temp;
+    
+    // Shift elements to the right
+    for (int i = writes_count; i > pos; i--) {
+        writes_arr[i] = writes_arr[i - 1];
+    }
+    
+    writes_arr[pos] = new_write;
     writes_count++;
-    sort_writes();
 }
 void insert_author() {
     author new_author;
@@ -461,6 +570,10 @@ void insert_author() {
         return;
     }
     new_author.surname = (char*)malloc(strlen(buffer) + 1);
+    if (new_author.surname == NULL) {
+        printf("Error: Memory allocation failed for surname\n");
+        return;
+    }
     strcpy(new_author.surname, buffer);
     printf("Enter author name (or '0' to cancel): ");
     fgets(buffer, MAX_LINE, stdin);
@@ -471,6 +584,11 @@ void insert_author() {
         return;
     }
     new_author.name = (char*)malloc(strlen(buffer) + 1);
+    if (new_author.name == NULL) {
+        printf("Error: Memory allocation failed for name\n");
+        free(new_author.surname);
+        return;
+    }
     strcpy(new_author.name, buffer);
     int max_id = 0;
     for (int i = 0; i < author_count; i++) {
@@ -481,7 +599,7 @@ void insert_author() {
     new_author.writer_id = max_id + 1;
     new_author.num_of_books = 0;
     insert_sorted_author(new_author);
-    printf("Author inserted successfully with ID: %d\n", new_author.writer_id);
+    printf(" Success! Author '%s %s' has been added with ID: %d\n", new_author.name, new_author.surname, new_author.writer_id);
 }
 void insert_book() {
     book new_book;
@@ -494,36 +612,63 @@ void insert_book() {
         return;
     }
     new_book.title = (char*)malloc(strlen(buffer) + 1);
+    if (new_book.title == NULL) {
+        printf("Error: Memory allocation failed for book title\n");
+        return;
+    }
     strcpy(new_book.title, buffer);
     printf("Enter release date (year): ");
-    scanf("%d", &new_book.release_date);
+    if (scanf("%d", &new_book.release_date) != 1) {
+        printf(" Error: Invalid year entered. Please enter a valid number.\n");
+        free(new_book.title);
+        while (getchar() != '\n');
+        return;
+    }
     printf("Enter price: ");
-    scanf("%f", &new_book.price);
+    if (scanf("%f", &new_book.price) != 1 || new_book.price < 0) {
+        printf(" Error: Invalid price entered. Price must be a positive number.\n");
+        free(new_book.title);
+        while (getchar() != '\n');
+        return;
+    }
     getchar();
     if (binary_search_book(new_book.title) != -1) {
-        printf("Book already exists!\n");
+        printf(" Error: A book with this title already exists!\n");
         free(new_book.title);
         return;
     }
     insert_sorted_book(new_book);
     printf("Enter number of authors: ");
     int num_authors;
-    scanf("%d", &num_authors);
+    if (scanf("%d", &num_authors) != 1 || num_authors <= 0) {
+        printf(" Error: Invalid number of authors. Must be at least 1.\n");
+        while (getchar() != '\n');
+        return;
+    }
     getchar();
     for (int i = 0; i < num_authors; i++) {
         printf("Enter author surname #%d: ", i + 1);
         fgets(buffer, MAX_LINE, stdin);
         buffer[strcspn(buffer, "\n")] = '\0';
-        int author_idx = binary_search_author_by_surname(buffer);
+        int author_idx = linear_search_author_by_surname(buffer);
         int author_id;
         if (author_idx == -1) {
             author new_author;
             new_author.surname = (char*)malloc(strlen(buffer) + 1);
+            if (new_author.surname == NULL) {
+                printf("Error: Memory allocation failed\n");
+                continue;
+            }
             strcpy(new_author.surname, buffer);
             printf("Author not found. Enter author name: ");
             fgets(buffer, MAX_LINE, stdin);
             buffer[strcspn(buffer, "\n")] = '\0';
             new_author.name = (char*)malloc(strlen(buffer) + 1);
+            if (new_author.name == NULL) {
+                printf("Error: Memory allocation failed\n");
+                free(new_author.surname);
+                continue;
+            }
             strcpy(new_author.name, buffer);
             int max_id = 0;
             for (int j = 0; j < author_count; j++) {
@@ -542,6 +687,10 @@ void insert_book() {
         }
         writes new_write;
         new_write.title = (char*)malloc(strlen(new_book.title) + 1);
+        if (new_write.title == NULL) {
+            printf("Error: Memory allocation failed for write entry\n");
+            continue;
+        }
         strcpy(new_write.title, new_book.title);
         new_write.writer_id = author_id;
         insert_sorted_writes(new_write);
@@ -566,6 +715,7 @@ void search_author() {
             printf("Name: %s %s\n", author_arr[i].name, author_arr[i].surname);
             printf("Number of books: %d\n", author_arr[i].num_of_books);
             printf("Books:\n");
+            int has_books = 0;
             for (int j = 0; j < writes_count; j++) {
                 if (writes_arr[j].writer_id == author_arr[i].writer_id) {
                     int book_idx = binary_search_book(writes_arr[j].title);
@@ -574,14 +724,18 @@ void search_author() {
                                 book_arr[book_idx].title,
                                 book_arr[book_idx].release_date,
                                 book_arr[book_idx].price);
+                        has_books = 1;
                     }
                 }
+            }
+            if (!has_books) {
+                printf("  This author hasn't published a single book yet!\n");
             }
             printf("\n");
         }
     }
     if (!found) {
-        printf("No author found with surname: %s\n", buffer);
+        printf(" Sorry, no author found with surname: %s\n", buffer);
     }
 }
 void search_book() {
@@ -595,7 +749,7 @@ void search_book() {
     }
     int idx = binary_search_book(buffer);
     if (idx == -1) {
-        printf("Book not found: %s\n", buffer);
+        printf(" Sorry, book not found: %s\n", buffer);
         return;
     }
     printf("\n--- Book Information ---\n");
@@ -627,7 +781,15 @@ void delete_author() {
     }
     int idx = binary_search_author_by_id(id);
     if (idx == -1) {
-        printf("Author with ID %d not found.\n", id);
+        printf("Error: Author with ID %d not found.\n", id);
+        return;
+    }
+    printf("\n  WARNING: This will delete author '%s %s' (ID: %d) and all related data!\n",
+           author_arr[idx].name, author_arr[idx].surname, id);
+    printf("Are you sure? (y/n): ");
+    fgets(buffer, MAX_LINE, stdin);
+    if (buffer[0] != 'y' && buffer[0] != 'Y') {
+        printf(" Deletion cancelled. Nothing was changed.\n");
         return;
     }
     int i = 0;
@@ -648,7 +810,10 @@ void delete_author() {
                         book_arr[k] = book_arr[k + 1];
                     }
                     book_count--;
-                    book_arr = (book*)realloc(book_arr, book_count * sizeof(book));
+                    if (book_count > 0) {
+                        book *temp_book = (book*)realloc(book_arr, book_count * sizeof(book));
+                        if (temp_book != NULL) book_arr = temp_book;
+                    }
                 }
             }
             free(writes_arr[i].title);
@@ -656,7 +821,10 @@ void delete_author() {
                 writes_arr[k] = writes_arr[k + 1];
             }
             writes_count--;
-            writes_arr = (writes*)realloc(writes_arr, writes_count * sizeof(writes));
+            if (writes_count > 0) {
+                writes *temp_write = (writes*)realloc(writes_arr, writes_count * sizeof(writes));
+                if (temp_write != NULL) writes_arr = temp_write;
+            }
         } else {
             i++;
         }
@@ -667,9 +835,14 @@ void delete_author() {
         author_arr[i] = author_arr[i + 1];
     }
     author_count--;
-    author_arr = (author*)realloc(author_arr, author_count * sizeof(author));
-    printf("Author deleted successfully.\n");
-    save_data();
+    if (author_count > 0) {
+        author *temp = (author*)realloc(author_arr, author_count * sizeof(author));
+        if (temp != NULL) author_arr = temp;
+    } else {
+        free(author_arr);
+        author_arr = NULL;
+    }
+    printf(" Success! Author has been removed from the system.\n");
 }
 void delete_book() {
     char buffer[MAX_LINE];
@@ -682,7 +855,15 @@ void delete_book() {
     }
     int idx = binary_search_book(buffer);
     if (idx == -1) {
-        printf("Book not found: %s\n", buffer);
+        printf(" Sorry, book not found: %s\n", buffer);
+        return;
+    }
+    printf("\n  WARNING: This will permanently delete '%s'!\n", buffer);
+    printf("Are you sure? (y/n): ");
+    char confirm[MAX_LINE];
+    fgets(confirm, MAX_LINE, stdin);
+    if (confirm[0] != 'y' && confirm[0] != 'Y') {
+        printf(" Deletion cancelled. Nothing was changed.\n");
         return;
     }
     int i = 0;
@@ -697,7 +878,10 @@ void delete_book() {
                 writes_arr[k] = writes_arr[k + 1];
             }
             writes_count--;
-            writes_arr = (writes*)realloc(writes_arr, writes_count * sizeof(writes));
+            if (writes_count > 0) {
+                writes *temp = (writes*)realloc(writes_arr, writes_count * sizeof(writes));
+                if (temp != NULL) writes_arr = temp;
+            }
         } else {
             i++;
         }
@@ -707,9 +891,14 @@ void delete_book() {
         book_arr[i] = book_arr[i + 1];
     }
     book_count--;
-    book_arr = (book*)realloc(book_arr, book_count * sizeof(book));
+    if (book_count > 0) {
+        book *temp = (book*)realloc(book_arr, book_count * sizeof(book));
+        if (temp != NULL) book_arr = temp;
+    } else {
+        free(book_arr);
+        book_arr = NULL;
+    }
     printf("Book deleted successfully.\n");
-    save_data();
 }
 void free_memory() {
     for (int i = 0; i < book_count; i++) {

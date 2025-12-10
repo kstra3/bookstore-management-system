@@ -2,15 +2,13 @@
 
 ![C](https://img.shields.io/badge/Language-C-blue.svg)
 ![Status](https://img.shields.io/badge/Status-Complete-success.svg)
-![License](https://img.shields.io/badge/License-MIT-green.svg)
 
 ## 📖 Overview
 
-A comprehensive bookstore management system developed in C, featuring three different implementations showcasing various data structures and algorithms. This project demonstrates fundamental concepts in data structures, file I/O, memory management, and algorithm design.
+A comprehensive bookstore management system developed in C, featuring two implementations showcasing different data structures and algorithms.
 
 **Project Name**: THE OPEN BOOK - University Library  
-**Institution**: University of Thessaly  
-**Version**: 1.0
+**Institution**: University of Thessaly
 
 ---
 
@@ -22,9 +20,9 @@ A comprehensive bookstore management system developed in C, featuring three diff
 - ✅ **Relationship Tracking**: Many-to-many author-book relationships
 - ✅ **Data Persistence**: File-based storage with automatic save/load
 - ✅ **Sorted Data**: Automatic sorting for efficient operations
-- ✅ **Binary Search**: O(log n) lookup performance
+- ✅ **Binary Search**: O(log n) lookup performance (Question 1)
 - ✅ **Dynamic Memory**: Efficient malloc/realloc/free management
-- ✅ **Beautiful UI**: Enhanced ASCII art menu interface
+- ✅ **Input Validation**: Year range (1000-2100), price validation, confirmations
 
 ---
 
@@ -32,265 +30,136 @@ A comprehensive bookstore management system developed in C, featuring three diff
 
 ```
 Ergasia_1/
-├── src/
-│   ├── bookstore_ask_1.c          # Question 1 - Dynamic Arrays
-│   ├── bookstore_bonus.c          # Bonus - Generic Structures
-│   ├── generic_array.c/.h         # Generic dynamic array implementation
-│   └── generic_list.c/.h          # Generic linked list implementation
+├── Question_1/
+│   └── bookstore_ask_1.c          # Dynamic Arrays Implementation
 ├── Question_2/
-│   └── bookstore_ask_2.c          # Question 2 - Linked Lists
+│   └── bookstore_ask_2.c          # Linked Lists Implementation
 ├── data/
 │   ├── books.txt                  # Book records
 │   ├── authors.txt                # Author records
 │   └── writes.txt                 # Author-Book relationships
-├── docs/
-│   ├── README.md                  # Detailed documentation
-│   └── BOOKSTORE_BONUS_README.md  # Generic implementation docs
-└── README.md                      # This file
+└── docs/
+    └── README.md                  # Detailed documentation
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🚀 How to Compile & Run
 
-### Prerequisites
-- GCC compiler (MinGW for Windows)
-- C standard library
-
-### Compilation
-
-#### Question 1 - Array Based Implementation
+### Question 1 (Array-based)
 ```bash
-cd "C:\Users\strat\OneDrive - ΠΑΝΕΠΙΣΤΗΜΙΟ ΘΕΣΣΑΛΙΑΣ\Επιφάνεια εργασίας\xaker\Ergasia_1"
-gcc src\bookstore_ask_1.c -o bookstore_ask_1.exe
+cd Question_1
+gcc bookstore_ask_1.c -o bookstore_ask_1
+./bookstore_ask_1
 ```
 
-#### Question 2 - Linked List Implementation
+### Question 2 (Linked List-based)
 ```bash
-cd "C:\Users\strat\OneDrive - ΠΑΝΕΠΙΣΤΗΜΙΟ ΘΕΣΣΑΛΙΑΣ\Επιφάνεια εργασίας\xaker\Ergasia_1\Question_2"
-gcc bookstore_ask_2.c -o bookstore_ask_2.exe
+cd Question_2
+gcc bookstore_ask_2.c -o bookstore_ask_2
+./bookstore_ask_2
 ```
 
-#### Bonus - Generic Structures
-```bash
-cd "C:\Users\strat\OneDrive - ΠΑΝΕΠΙΣΤΗΜΙΟ ΘΕΣΣΑΛΙΑΣ\Επιφάνεια εργασίας\xaker\Ergasia_1\src"
-gcc bookstore_bonus.c generic_array.c generic_list.c -o bookstore_bonus.exe
-```
-
-### Execution
-```bash
-# Run from project root directory
+### Windows (PowerShell)
+```powershell
+cd Question_1
+gcc bookstore_ask_1.c -o bookstore_ask_1
 .\bookstore_ask_1.exe
-.\bookstore_ask_2.exe
-.\bookstore_bonus.exe
 ```
 
 ---
 
-## 💻 Implementations
+## 📊 Implementation Comparison
 
-### Question 1: Dynamic Arrays
-- **Data Structures**: Dynamic arrays with realloc
-- **Sorting**: Bubble sort (O(n²))
-- **Search**: Binary search (O(log n))
-- **File**: `src/bookstore_ask_1.c`
-
-### Question 2: Linked Lists  
-- **Data Structures**: Singly linked lists
-- **Sorting**: Custom sorting algorithms
-- **Search**: Linear search (O(n))
-- **File**: `Question_2/bookstore_ask_2.c`
-
-### Bonus: Generic Structures
-- **Data Structures**: Generic arrays + generic linked lists
-- **Sorting**: qsort for arrays, merge sort for lists
-- **Search**: Binary search with function pointers
-- **Features**: Type-safe generics with void pointers
-- **Files**: `src/bookstore_bonus.c`, `generic_array.c/h`, `generic_list.c/h`
+| Feature | Question 1 (Arrays) | Question 2 (Linked Lists) |
+|---------|-------------------|-------------------------|
+| **Data Structure** | Dynamic arrays with `realloc` | Linked lists with nodes |
+| **Search** | Binary search O(log n) | Linear search O(n) |
+| **Sort** | `qsort` with comparators | Sorted insertion |
+| **Memory** | Contiguous, resizable | Scattered, node-based |
+| **Insertion** | O(n) with realloc | O(n) sorted insert |
+| **Deletion** | O(n) shift elements | O(n) unlink node |
 
 ---
 
-## 📊 Data File Format
-
-### books.txt
-```
-<book_count>
-<title_1>
-<release_year>
-<price>
-<title_2>
-...
-```
+## 💾 Data Format
 
 ### authors.txt
 ```
-<author_count>
-<writer_id>
-<surname>
-<name>
-<num_of_books>
-...
+3
+1 John Doe
+2 Jane Smith
+3 Bob Johnson
+```
+
+### books.txt
+```
+2
+101 Introduction to C 2020 45.99
+102 Data Structures 2021 59.99
 ```
 
 ### writes.txt
 ```
-<unique_book_count>
-<book_title_1>
-<author_id_1> & <author_id_2> & ...
-<book_title_2>
-...
+3
+1 101
+2 102
+1 102
 ```
 
 ---
 
-## 🎨 User Interface
+## ✨ Key Features Implemented
 
-All implementations feature an enhanced ASCII art menu:
+### Security & Validation
+- ✅ Memory leak prevention on cancelled operations
+- ✅ NULL pointer checks for all malloc/realloc
+- ✅ Input validation (year: 1000-2100, price ≥ 0.01)
+- ✅ Deletion confirmations ("Are you sure?")
+- ✅ Buffer overflow protection
 
-```
-  +=====================================================================+
-  |                                                                     |
-  |         ##  ##  ########  ##  ##  ##        ####  ######            |
-  |         ##  ##     ##     ##  ##  ##         ##   ##   ##           |
-  |         ##  ##     ##     ######  ##         ##   ######            |
-  |         ##  ##     ##     ##  ##  ##         ##   ##   ##           |
-  |          ####      ##     ##  ##  ######    ####  ######            |
-  |                                                                     |
-  |         ######     #####     #####     ######      ##  ##           |
-  |         ##   ##   ##   ##   ##   ##    ##  ##      ##  ##           |
-  |         ######    #######   #######    ######       ####            |
-  |         ##   ##   ##   ##   ##   ##    ##  ##        ##             |
-  |         ######    ##   ##   ##   ##    ##   ##       ##             |
-  |                                                                     |
-  |                  =======================================             |
-  |                   THE OPEN BOOK - UNIVERSITY LIBRARY                |
-  |                   Digital Management System v1.0                    |
-  +=====================================================================+
-```
+### User Experience
+- ✅ Clear error messages with symbols (✓, ✗, ⚠️)
+- ✅ Informative "no books found" messages
+- ✅ Cross-platform support (Windows/Linux)
+- ✅ Clean ASCII art menu interface
 
 ---
 
-## 🔧 Operations
+## 🛠️ Technical Details
 
-### 1. Insert Writer Record
-Add new author with auto-generated ID
+### Algorithms Used
+- **Binary Search**: O(log n) for sorted arrays (Q1)
+- **Quick Sort**: O(n log n) via `qsort` (Q1)
+- **Linear Search**: O(n) for linked lists (Q2)
+- **Sorted Insertion**: O(n) for maintaining order (Q2)
 
-### 2. Insert Book Record
-Add book with multiple authors, creates new authors if needed
-
-### 3. Search Writer Record
-Find author by surname, displays all books
-
-### 4. Search Book Record
-Find book by title, displays all authors
-
-### 5. Delete Writer Record
-Remove author and optionally cascade delete single-author books
-
-### 6. Delete Book Record
-Remove book and update author book counts
-
-### 7. Exit
-Save all changes and quit
-
-**Note**: Type '0' or press ENTER to cancel any operation
+### Memory Management
+- Dynamic allocation with `malloc`/`realloc`
+- Proper cleanup with `free` before exit
+- Error handling for allocation failures
+- Prevention of memory leaks on user cancel
 
 ---
 
-## ⚙️ Algorithm Complexity
+## 📝 Assignment Requirements
 
-| Operation | Array (Q1) | Linked List (Q2) | Generic (Bonus) |
-|-----------|------------|------------------|-----------------|
-| Insert | O(n²) | O(n) | O(n log n) |
-| Delete | O(n) | O(n) | O(n) |
-| Search | O(log n) | O(n) | O(log n) |
-| Sort | O(n²) | O(n²) | O(n log n) |
-
----
-
-## 🧪 Testing
-
-Create sample data files in the `data/` folder to test:
-
-```bash
-mkdir data
-# Add sample books.txt, authors.txt, writes.txt
-```
-
-Example test data provided in repository.
-
----
-
-## 📝 Key Concepts Demonstrated
-
-- **Data Structures**: Arrays, Linked Lists, Generic Structures
-- **Algorithms**: Sorting, Binary Search, Memory Management
-- **File I/O**: Text file parsing and writing
-- **Memory Management**: malloc, realloc, free
-- **Function Pointers**: Generic comparison and display functions
-- **Modular Design**: Separation of concerns
-- **User Experience**: Interactive menu system
-
----
-
-## 🐛 Known Limitations
-
-### Question 1 (Arrays)
-- Bubble sort is inefficient for large datasets
-- Binary search requires sorted arrays
-- Array reallocations can be costly
-
-### Question 2 (Linked Lists)
-- Linear search is O(n)
-- More memory overhead per node
-- No random access
-
-### Bonus (Generic)
-- More complex implementation
-- Type safety relies on proper usage
-
----
-
-## 🚧 Future Improvements
-
-- [ ] Add input validation and error handling
-- [ ] Implement update operations
-- [ ] Add transaction support
-- [ ] Create unit tests
-- [ ] Optimize sorting algorithms
-- [ ] Add search by multiple criteria
-- [ ] Implement undo/redo functionality
-- [ ] Add export to CSV/JSON
+✅ **Question 1**: Dynamic array implementation with binary search  
+✅ **Question 2**: Linked list implementation with sorted insertion  
+✅ All 6 operations implemented in both versions  
+✅ File I/O for data persistence  
+✅ Proper sorting and searching algorithms  
+✅ Complete memory management
 
 ---
 
 ## 👨‍💻 Author
 
-**University of Thessaly Student**  
-Computer Science Department
+**University of Thessaly**  
+Data Structures Course Project
 
 ---
 
 ## 📄 License
 
-This project is licensed under the MIT License - feel free to use for educational purposes.
-
----
-
-## 🙏 Acknowledgments
-
-- University of Thessaly - Data Structures Course
-- C Programming Language - Dennis Ritchie & Brian Kernighan
-- Open source community for inspiration
-
----
-
-## 📞 Contact & Support
-
-For questions or issues:
-- Create an issue in the repository
-- Contact through university email
-
----
-
-**Made with ❤️ for Data Structures Course**
+This project is part of academic coursework at the University of Thessaly.
