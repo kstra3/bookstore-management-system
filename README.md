@@ -1,4 +1,4 @@
-# 📚 UTHLIBRARY - University Bookstore Management System
+# 📚 UTHLIBRARY - University Bookstore Management System - Exercise for academy lecture
 
 ![C](https://img.shields.io/badge/Language-C-blue.svg)
 ![Status](https://img.shields.io/badge/Status-Complete-success.svg)
